@@ -6,6 +6,7 @@ package es.upm.dit.aled.lab3;
  * @author mmiguel, rgarciacarmona
  *
  */
+//pruebaGITlab3
 public class FASTAException extends Exception{
 
 	public FASTAException(String msg) {
