@@ -12,3 +12,4 @@ public class FASTAException extends Exception{
 		super(msg);
 	}
 }
+//prueba
