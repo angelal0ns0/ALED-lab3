@@ -123,7 +123,7 @@ public class FASTAReader {
 			throw new FASTAException("Pattern goes beyond the end of the file.");
 		}
 		boolean match = true;
-		for (int i = 0; i < pattern.length; i++) {
+		for (int i = 0; i < pattern.length; i++) { //complejidad O(m) donde m es el tamaño del patrón
 			if (pattern[i] != content[position + i]) { //si coinciden no se mete al if
 				match = false; //match no cambia de result
 			}
@@ -141,16 +141,15 @@ public class FASTAReader {
 		//lanza FASTAException si el patrón se extiende mas allá de los bytes
 		if (position + pattern.length > validBytes) {
 			 throw new FASTAException("Pattern goes beyond the end of the file.");
-			 }
-		
-		boolean match2 = true;
+		}
+		boolean match = true;
 		for (int i = 0; i < pattern.length; i++) {
 			if (pattern[i] != content[position + i]) { //si no coinciden --> if
-				match2 = false;	
-				break;
+				match = false;	
+				break; //devuelve false en cuanto una base no coincide (break cuando el match es false)
 			}
 		}
-		return match2;
+		return match;
 	}
 	
 
@@ -164,7 +163,17 @@ public class FASTAReader {
 	 */
 	private int compareNumErrors(byte[] pattern, int position) throws FASTAException {
 		// TODO
-		return -1;
+		if (position + pattern.length > validBytes) {
+			 throw new FASTAException("Pattern goes beyond the end of the file.");
+		}
+		
+		int contador = 0;
+		for (int i = 0; i < pattern.length; i++) {
+			if (pattern[i] != content[position + i]) { //si no coinciden --> if
+				contador++;
+			}
+		}		
+		return contador;
 	}
 
 	/**
@@ -177,14 +186,18 @@ public class FASTAReader {
 	 *         pattern in the data.
 	 * @throws FASTAException 
 	 */
-	public List<Integer> search(byte[] pattern) throws FASTAException {
+	public List<Integer> search(byte[] pattern)  { //pattern m
 		// TODO
 		ArrayList<Integer> results = new ArrayList<>();
 
-	    for (int i = 0; i < (validBytes - pattern.length); i++) {
+		for (int i = 0; i <= validBytes - pattern.length; i++) {
+	        try {
 	            if (compare(pattern, i)) {
 	                results.add(i);  // guardamos la posición donde encaja
-	            }  
+	            }
+	        } catch (FASTAException e) {
+	            break;  // se ha llegado al final del genoma
+	        }
 	    }
 
 	    return results;
@@ -207,7 +220,7 @@ public class FASTAReader {
 		return null;
 	}
 
-	public static void main(String[] args) throws FASTAException {
+	public static void main(String[] args) {
 		long t1 = System.nanoTime();
 		FASTAReader reader = new FASTAReader(args[0]);
 		if (args.length == 1)
