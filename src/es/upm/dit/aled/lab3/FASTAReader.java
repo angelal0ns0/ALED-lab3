@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -123,8 +124,8 @@ public class FASTAReader {
 		}
 		boolean match = true;
 		for (int i = 0; i < pattern.length; i++) {
-			if (pattern[i] != content[position + i]) {
-				match = false;
+			if (pattern[i] != content[position + i]) { //si coinciden no se mete al if
+				match = false; //match no cambia de result
 			}
 		}
 		return match;
@@ -136,8 +137,22 @@ public class FASTAReader {
 	 */
 	private boolean compareImproved(byte[] pattern, int position) throws FASTAException {
 		// TODO
-		return false;
+		//devuelve false en cuanto una base no coincide, 
+		//lanza FASTAException si el patrón se extiende mas allá de los bytes
+		if (position + pattern.length > validBytes) {
+			 throw new FASTAException("Pattern goes beyond the end of the file.");
+			 }
+		
+		boolean match2 = true;
+		for (int i = 0; i < pattern.length; i++) {
+			if (pattern[i] != content[position + i]) { //si no coinciden --> if
+				match2 = false;	
+				break;
+			}
+		}
+		return match2;
 	}
+	
 
 	/*
 	 * Improved version of the compare method that returns the number of bytes in
@@ -160,10 +175,19 @@ public class FASTAReader {
 	 * @param pattern The pattern to be found.
 	 * @return All the positions of the first character of every occurrence of the
 	 *         pattern in the data.
+	 * @throws FASTAException 
 	 */
-	public List<Integer> search(byte[] pattern) {
+	public List<Integer> search(byte[] pattern) throws FASTAException {
 		// TODO
-		return null;
+		ArrayList<Integer> results = new ArrayList<>();
+
+	    for (int i = 0; i < (validBytes - pattern.length); i++) {
+	            if (compare(pattern, i)) {
+	                results.add(i);  // guardamos la posición donde encaja
+	            }  
+	    }
+
+	    return results;
 	}
 
 	/**
@@ -183,7 +207,7 @@ public class FASTAReader {
 		return null;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FASTAException {
 		long t1 = System.nanoTime();
 		FASTAReader reader = new FASTAReader(args[0]);
 		if (args.length == 1)
