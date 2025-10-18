@@ -217,9 +217,36 @@ public class FASTAReader {
 	 */
 	public List<Integer> searchSNV(byte[] pattern) {
 		// TODO
-		return null;
+	List<Integer> results = new ArrayList<>(); //lista a devolver
+
+	// Recorre posiciones váidas del genoma (sin que se salga el patrón)
+		  for (int i = 0; i <= validBytes - pattern.length; i++) {
+		    	
+		    	int numErrors = 0; //variabe que cuenta el numero de errors
+				
+		    	try { 	
+		    	//el metodo compare NumeErrors lanza excepciones ---> hago try/catch
+		    	// Compara el patrón con el contenido del genoma en esta posición
+		        // y cuenta cuántas bases no coinciden usando compareNumErrors()
+				numErrors = compareNumErrors(pattern, i); 	
+				
+				// Si hay 0 o 1 diferencias, cumple SNV
+				//---> añado esa posicion válida a results
+		        if (numErrors <= 1) {
+		            results.add(i);
+		        }
+				
+		        // Si el patrón se sale del final del genoma, se lanza la excepción
+	            // y se termina la búsqueda
+		    	} catch (FASTAException e) {
+					break; 
+				}
+		   }
+		  return results;
 	}
 
+	
+	
 	public static void main(String[] args) {
 		long t1 = System.nanoTime();
 		FASTAReader reader = new FASTAReader(args[0]);
