@@ -1,5 +1,6 @@
 package es.upm.dit.aled.lab3.binary;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,8 +32,8 @@ public class FASTAReaderSuffixes extends FASTAReader {
 	 * @param fileName The name of the FASTA file.
 	 */
 	public FASTAReaderSuffixes(String fileName) {
-		// Calls the parent constructor
-		super(fileName);
+		//llama al constructor de FastaReader(padre) para leer el genoma del acrhivo
+		super(fileName); 
 		this.suffixes = new Suffix[validBytes];
 		for (int i = 0; i < validBytes; i++)
 			suffixes[i] = new Suffix(i);
@@ -78,8 +79,43 @@ public class FASTAReaderSuffixes extends FASTAReader {
 	 */
 	@Override
 	public List<Integer> search(byte[] pattern) {
-		// TODO
-		return null;
+		List <Integer> listaPos = new ArrayList<Integer>();
+		int lo = 0;
+		int hi = suffixes.length -1 ; //ultima posicion (incluida)
+		boolean found = false; 
+		int index = 0;
+		int me = (lo + hi) / 2;
+		int posSuf = 0;
+		
+		do {
+			me = (int) Math.floor(lo + (hi-lo)/2); //se actualiza cada vez (N/2)
+			posSuf = suffixes[me].suffixIndex;
+			
+			//Recorro patter con el índice que sera la posicion dentro de pattern, compararé con suffixes desde el medio
+			for(index = 0; index < pattern.length; index++) {
+				//que se rompa el for si hay diferencia
+				if(pattern[index]!= content[posSuf + index])
+					break; //sale cuando index = pattern.length
+			}
+			
+			/* sí se da qué index llega a ser la última posición del patrón es porque
+			 * el bucle se ha recorrido del todo y por lo tanto todos los 
+			 * caracteres coinciden --> encontrado = true
+			 */
+			if(index == pattern.length) {
+				found = true; //para el while
+				listaPos.add(posSuf);
+			}
+			else {
+				if(pattern[index] < content[posSuf + index])
+					hi = me - 1;
+				else
+					lo = me + 1;
+			}
+			
+		} while(!found && hi - lo >1);
+		
+		return listaPos;
 	}
 
 	public static void main(String[] args) {
