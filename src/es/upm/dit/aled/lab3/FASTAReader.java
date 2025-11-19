@@ -188,19 +188,19 @@ public class FASTAReader {
 	 */
 	public List<Integer> search(byte[] pattern)  { //pattern m
 		// TODO
-		ArrayList<Integer> results = new ArrayList<>();
-
-		for (int i = 0; i <= validBytes - pattern.length; i++) {
-	        try {
-	            if (compare(pattern, i)) {
-	                results.add(i);  // guardamos la posición donde encaja
-	            }
-	        } catch (FASTAException e) {
-	            break;  // se ha llegado al final del genoma
+		List<Integer> indices = new ArrayList<>();
+		for (int i = 0; i < content.length; i++) { //recorro contenido
+	        boolean match; 
+			try {
+				if(compare(pattern, i))
+					indices.add(i);
+	        	
+			} catch (FASTAException e) {
+	            break;  //rompemos bucle for si hay excepcion
 	        }
-	    }
-
-	    return results;
+	       
+		}//cierre del for
+	    return indices;
 	}
 
 	/**
@@ -254,7 +254,7 @@ public class FASTAReader {
 			return;
 		System.out.println("Tiempo de apertura de fichero: " + (System.nanoTime() - t1));
 		long t2 = System.nanoTime();
-		List<Integer> posiciones = reader.search(args[1].getBytes());
+		List<Integer> posiciones = reader.search(args[1].getBytes()); //invoca al search que hemos implementado
 		System.out.println("Tiempo de búsqueda: " + (System.nanoTime() - t2));
 		if (posiciones.size() > 0) {
 			for (Integer pos : posiciones)
