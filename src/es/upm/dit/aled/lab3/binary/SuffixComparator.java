@@ -12,6 +12,7 @@ public class SuffixComparator implements Comparator<Suffix> {
 
 	// Since FASTAReader is the base class containing content and validBytes,
 	// we need a reference to it to access the data.
+	
 	private final FASTAReaderSuffixes reader;
 
 	/**
