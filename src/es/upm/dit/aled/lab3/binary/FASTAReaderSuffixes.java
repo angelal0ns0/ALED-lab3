@@ -34,11 +34,11 @@ public class FASTAReaderSuffixes extends FASTAReader {
 	public FASTAReaderSuffixes(String fileName) {
 		//llama al constructor de FastaReader(padre) para leer el genoma del acrhivo
 		super(fileName); 
-		this.suffixes = new Suffix[validBytes];
-		for (int i = 0; i < validBytes; i++)
-			suffixes[i] = new Suffix(i);
+		this.suffixes = new Suffix[validBytes]; //crea array vacio del mismo tamaño que validBytes
+		for (int i = 0; i < validBytes; i++) //recorre suffixes creando un new suffix con los numeros correspondientes
+			suffixes[i] = new Suffix(i); // creando un new suffix con los numeros correspondientes
 		// Sorts the data
-		sort();
+		sort(); //metodo sort programado aparte--> ordena el array de sujijos
 	}
 
 	/*
@@ -48,9 +48,9 @@ public class FASTAReaderSuffixes extends FASTAReader {
 	private void sort() {
 		// Instantiate the external SuffixComparator, passing 'this' (the reader)
 		// so it can access the content and validBytes fields.
-		SuffixComparator suffixComparator = new SuffixComparator(this);
+		SuffixComparator suffixComparator = new SuffixComparator(this); //invoca al comparador de sufijos
 		// Use the external Comparator for sorting.
-		Arrays.sort(this.suffixes, suffixComparator);
+		Arrays.sort(this.suffixes, suffixComparator); //lo que quiere ordenar
 	}
 
 	/**
@@ -79,43 +79,34 @@ public class FASTAReaderSuffixes extends FASTAReader {
 	 */
 	@Override
 	public List<Integer> search(byte[] pattern) {
-		List <Integer> listaPos = new ArrayList<Integer>();
-		int lo = 0;
-		int hi = suffixes.length -1 ; //ultima posicion (incluida)
+		List <Integer> resultados = new ArrayList<Integer>(); //lista que devolveré
+		int lo = 0; //posicc 0 (de suffixes)
+		int hi = suffixes.length; //tamaño de suffixes
 		boolean found = false; 
 		int index = 0;
-		int me = (lo + hi) / 2;
-		int posSuf = 0;
 		
-		do {
-			me = (int) Math.floor(lo + (hi-lo)/2); //se actualiza cada vez (N/2)
-			posSuf = suffixes[me].suffixIndex;
+		while(!found && hi - lo >1) {
+			int m = (lo + hi) / 2;
+			int posSuffix = this.suffixes[m].suffixIndex; //.suffixIndex --> le pido el indice "interno" 
+														//del obejto suffix en la posicion m de suffixes
 			
-			//Recorro patter con el índice que sera la posicion dentro de pattern, compararé con suffixes desde el medio
-			for(index = 0; index < pattern.length; index++) {
-				//que se rompa el for si hay diferencia
-				if(pattern[index]!= content[posSuf + index])
-					break; //sale cuando index = pattern.length
-			}
-			
-			/* sí se da qué index llega a ser la última posición del patrón es porque
-			 * el bucle se ha recorrido del todo y por lo tanto todos los 
-			 * caracteres coinciden --> encontrado = true
-			 */
-			if(index == pattern.length) {
-				found = true; //para el while
-				listaPos.add(posSuf);
-			}
-			else {
-				if(pattern[index] < content[posSuf + index])
-					hi = me - 1;
+			while(index < pattern.length && posSuffix +index < content.length && pattern[index]==content[posSuffix + index])
+				index++; //contaremos coincidencias--> index++
+			if(index==pattern.length) { 
+				//index se ha incrementado hasta ser del tamaño del patron (hemos encontrado el patron entero)
+				resultados.add(posSuffix);
+				found = true;
+			} //cierre if
+			else { //no hay coincidencia completa
+				if(pattern[index] < content[posSuffix + index])
+					hi = m--; //me voy hacia la izquierda en el lim superior
 				else
-					lo = me + 1;
+					lo = m++; //me quedo con la mitad derecha, lim inferior en posicion m+1 = m++
+				index = 0; //reiniciamos la busqueda en la mitad que sea, hay que poner el index a cero		
 			}
 			
-		} while(!found && hi - lo >1);
-		
-		return listaPos;
+		}  
+		return resultados;
 	}
 
 	public static void main(String[] args) {

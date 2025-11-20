@@ -140,16 +140,14 @@ public class FASTAReader {
 		//devuelve false en cuanto una base no coincide, 
 		//lanza FASTAException si el patrón se extiende mas allá de los bytes
 		if (position + pattern.length > validBytes) {
-			 throw new FASTAException("Pattern goes beyond the end of the file.");
+			throw new FASTAException("Pattern goes beyond the end of the file.");
 		}
-		boolean match = true;
-		for (int i = 0; i < pattern.length; i++) {
-			if (pattern[i] != content[position + i]) { //si no coinciden --> if
-				match = false;	
-				break; //devuelve false en cuanto una base no coincide (break cuando el match es false)
-			}
-		}
-		return match;
+		
+		for (int i = 0; i < pattern.length; i++)  //complejidad O(m) donde m es el tamaño del patrón
+			if (pattern[i] != content[position + i])  //si coinciden no se mete al if
+				return false; 
+			
+		return true;
 	}
 	
 
@@ -169,7 +167,7 @@ public class FASTAReader {
 		
 		int contador = 0;
 		for (int i = 0; i < pattern.length; i++) {
-			if (pattern[i] != content[position + i]) { //si no coinciden --> if
+			if (pattern[i] != content[position + i]) { //si no coinciden --> if --> contador++
 				contador++;
 			}
 		}		
@@ -192,7 +190,7 @@ public class FASTAReader {
 		for (int i = 0; i < content.length; i++) { //recorro contenido
 	        boolean match; 
 			try {
-				if(compare(pattern, i))
+				if(compareImproved(pattern, i))
 					indices.add(i);
 	        	
 			} catch (FASTAException e) {
@@ -217,7 +215,7 @@ public class FASTAReader {
 	 */
 	public List<Integer> searchSNV(byte[] pattern) {
 		// TODO
-	List<Integer> results = new ArrayList<>(); //lista a devolver
+	List<Integer> indices = new ArrayList<>(); //lista a devolver
 
 	// Recorre posiciones váidas del genoma (sin que se salga el patrón)
 		  for (int i = 0; i <= validBytes - pattern.length; i++) {
@@ -233,7 +231,7 @@ public class FASTAReader {
 				// Si hay 0 o 1 diferencias, cumple SNV
 				//---> añado esa posicion válida a results
 		        if (numErrors <= 1) {
-		            results.add(i);
+		            indices.add(i);
 		        }
 				
 		        // Si el patrón se sale del final del genoma, se lanza la excepción
@@ -242,7 +240,7 @@ public class FASTAReader {
 					break; 
 				}
 		   }
-		  return results;
+		  return indices;
 	}
 
 	
@@ -254,7 +252,7 @@ public class FASTAReader {
 			return;
 		System.out.println("Tiempo de apertura de fichero: " + (System.nanoTime() - t1));
 		long t2 = System.nanoTime();
-		List<Integer> posiciones = reader.search(args[1].getBytes()); //invoca al search que hemos implementado
+		List<Integer> posiciones = reader.searchSNV(args[1].getBytes()); //invoca al search que hemos implementado
 		System.out.println("Tiempo de búsqueda: " + (System.nanoTime() - t2));
 		if (posiciones.size() > 0) {
 			for (Integer pos : posiciones)
