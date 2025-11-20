@@ -89,23 +89,45 @@ public class FASTAReaderSuffixes extends FASTAReader {
 			int m = (lo + hi) / 2;
 			int posSuffix = this.suffixes[m].suffixIndex; //.suffixIndex --> le pido el indice "interno" 
 														//del obejto suffix en la posicion m de suffixes
-			
 			while(index < pattern.length && posSuffix +index < content.length && pattern[index]==content[posSuffix + index])
 				index++; //contaremos coincidencias--> index++
 			if(index==pattern.length) { 
 				//index se ha incrementado hasta ser del tamaño del patron (hemos encontrado el patron entero)
 				resultados.add(posSuffix);
 				found = true;
-			} //cierre if
-			else { //no hay coincidencia completa
-				if(pattern[index] < content[posSuffix + index])
-					hi = m--; //me voy hacia la izquierda en el lim superior
-				else
-					lo = m++; //me quedo con la mitad derecha, lim inferior en posicion m+1 = m++
-				index = 0; //reiniciamos la busqueda en la mitad que sea, hay que poner el index a cero		
-			}
 			
+			//recorro para atras (izqda) (desde suffixes(m-1))
+			int i = 1;
+			do {
+				index = 0;
+				posSuffix = this.suffixes[m-i].suffixIndex; //actualizao posSuf cada vez que me voy a la casilla anterior
+				while(index < pattern.length && posSuffix +index < content.length && pattern[index]==content[posSuffix + index])
+					index++;
+				if(index==pattern.length) //habré encontrado una nueva coincidencia
+					resultados.add(posSuffix);
+				i++;	//retrocedo en el array de sufijos (m-i), i aumentando.
+			} while(index==pattern.length); //si hay coincidencia
+			
+			//recorro para alante (dcha)
+			i = 1;
+			do {
+				index = 0;
+				posSuffix = this.suffixes[m+i].suffixIndex; //me voy moviendo hacia la derecha
+				while(index < pattern.length && posSuffix +index < content.length && pattern[index]==content[posSuffix + index])
+					index++;
+				if(index==pattern.length)
+					resultados.add(posSuffix);
+				i++;
+			} while(index == pattern.length);	
 		}  
+		else { //no hay coincidencia completa
+			if(pattern[index] < content[posSuffix + index])
+				hi = m--; //me voy hacia la izquierda en el lim superior
+			else
+				lo = m++; //me quedo con la mitad derecha, lim inferior en posicion m+1 = m++
+			index = 0; //reiniciamos la busqueda en la mitad que sea, hay que poner el index a cero	
+		}
+		}//cierre del while de arriba del todo
 		return resultados;
 	}
 
